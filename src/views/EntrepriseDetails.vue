@@ -2,8 +2,11 @@
   <div v-if="entreprise" class="entreprise-detail-container">
     <div class="entreprise-header-card">
       <div class="logo-container">
-        <img :src="`data:image/png; ${entreprise.image}`" alt="Logo de l'entreprise" class="entreprise-logo" />
-
+        <img
+          :src="`data:image/png; ${entreprise.image}`"
+          alt="Logo de l'entreprise"
+          class="entreprise-logo"
+        />
       </div>
       <div class="nom-container">
         <h3>Entreprise</h3>
@@ -13,8 +16,8 @@
     <div class="entreprise-detail-wrapper">
       <div class="crud-icons">
         <i class="fa-solid fa-check" style="color: green"></i>
-        <i class="fa-solid fa-pen-to-square" style="color: gray"></i>
-        <i class="fa-solid fa-trash-can" style="color: red"></i>
+        <i class="fa-solid fa-pen-to-square" @click="mettreAjour" style="color: gray"></i>
+        <i class="fa-solid fa-trash-can" @click="supprimerEntreprise" style="color: red"></i>
       </div>
       <div class="entreprise-detail-container">
         <div class="entreprise-content">
@@ -75,24 +78,41 @@
 import axios from 'axios';
 
 export default {
-  name: 'EntrepriseDetail',
-  props: ['id'],
+  name: 'EntrepriseDetails',
   data() {
     return {
       entreprise: null
-    };MP
+    };
   },
-  async mounted() {
-    try {
-      const id = this.$route.params.id;
-      const response = await axios.get(`https://api-3.fly.dev/enterprises/${id}`);
-      this.entreprise = response.data;
-    } catch (error) {
-      console.error('Erreur lors de la récupération des détails de l\'entreprise:', error);
+  methods: {
+    async chargerEntreprise() {
+      try {
+        const response = await axios.get(`https://api-3.fly.dev/enterprises/${this.$route.params.id}`);
+        this.entreprise = response.data;
+      } catch (error) {
+        console.error("Erreur lors de la récupération des détails de l'entreprise:", error);
+      }
+    },
+    mettreAjour() {
+      this.$router.push({ name: 'EntrepriseMiseAjour', params: { id: this.entreprise._id } });
+    },
+    async supprimerEntreprise() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?')) {
+        try {
+          await axios.delete(`https://api-3.fly.dev/enterprises/${this.$route.params.id}`);
+          this.$router.push({ name: 'Entreprises' });
+        } catch (error) {
+          console.error('Erreur lors de la suppression de l\'entreprise:', error);
+        }
+      }
     }
+  },
+  mounted() {
+    this.chargerEntreprise();
   }
 }
 </script>
+
 
 
 <style scoped>
